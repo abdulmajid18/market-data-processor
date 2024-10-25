@@ -1,0 +1,43 @@
+# Ignore build directories
+/build/
+/bin/
+/out/
+/dist/
+
+# Ignore executable files
+*.exe
+*.out
+*.app
+*.o
+*.a
+*.so
+*.dll
+*.dylib
+
+# Ignore C++ debugging and profiling files
+*.dSYM/
+*.stackdump
+*.core
+
+# Ignore CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Ignore other development artifacts
+*.log
+*.tmp
+*.swp
+*.bak
+*.swo
+
+# Ignore personal and temporary files
+.vscode/
+.idea/
+*.user
+*.DS_Store
+*~
+
+# Ignore any CSV data files in `data` if you don't want to commit them
+data/*.csv
