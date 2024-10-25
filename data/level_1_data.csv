@@ -1,0 +1,2 @@
+symbol,timestamp,bid_price,bid_size,ask_price,ask_size,last_trade_price,last_trade_size,last_trade_timestamp
+AAPL,2024-10-25T14:30:00Z,145.30,100,145.50,150,145.25,200,2024-10-25T14:29:55Z
