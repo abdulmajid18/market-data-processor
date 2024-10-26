@@ -8,41 +8,113 @@
 #define MAX_COLUMN 100
 using namespace std;
 
-void readCSV(const std::string& filename, vector<vector<string>>& data) {
-    ifstream file_stream(filename);
-    string line;
+class CSVReader{
+    private:
+        char delimiter;
+        bool hasHeader;
+        std::vector<string> headers;
 
-    if (!file_stream.is_open()) {
-        cerr << "Could not open file: " << filename << endl;
-        return;
-    }
+        static std::string trim(const std::string& str) {
+            const std::string whitespace = " \t\r\n";
+            size_t start = str.find_first_not_of(whitespace);
+            size_t end = str.find_last_not_of(whitespace);
 
-    while (getline(file_stream, line)) {
-        stringstream ss(line);
-        string cell;
-        vector<string> row;
-        while (getline(ss, cell, ',')) {
-            row.push_back(cell);
+            if (start == std::string::npos) return "";
+            return str.substr(start, end - start + 1);
         }
-        data.push_back(row);
 
-    }
-    file_stream.close();
-}
+    public:
+        CSVReader(char delim = ',', bool header = true)
+        : delimiter(delim), hasHeader(header) {}
+
+        std::vector<std::vector<std::string>> readCSV(const std::string& filename) {
+            std::vector<std::vector<std::string>> data;
+            std::ifstream file(filename);
+
+            if (!file.is_open()) {
+                throw std::runtime_error("Could not open file: " + filename);
+            }
+
+            std::string line;
+            bool firstLine = true;
+
+            while (std::getline(file, line)) {
+                if (line.empty())
+                    continue;
+                
+                std::vector<std::string> row;
+                std::string cell;
+                std::stringstream cellStream(line);
+
+                while (std::getline(cellStream, cell, delimiter)) {
+                    row.push_back(trim(cell));
+                }
+
+                if (firstLine && hasHeader) {
+                    headers = row;
+                    firstLine = false;
+                }
+
+                data.push_back(row);
+            }
+            file.close();
+            return data;
+        }
+
+        const std::vector<std::string>& getHeaders() const {
+            return headers;
+        }
+
+        bool validateData(const std::vector<std::vector<std::string>>& data) const {
+            if (data.empty()) return true;
+
+            size_t expectedCols = hasHeader ? headers.size() : data[0].size();
+
+            for (size_t i = 0; i < data.size(); ++i) {
+                if (data[i].size() != expectedCols) {
+                    std::cerr << "Row " << i + 1 << " has incorrect number of columns. "
+                         << "Expected: " << expectedCols << ", Got: " << data[i].size() << std::endl;
+                return false;
+                }
+            }
+            return true;
+        }
+
+};
+
 
 int main() {
-    std::string filename = "../data/tick_by_tick_data.csv"; // Replace with your CSV file path
-    std::vector<std::vector<std::string>> data;
+    try {
+        std::string filename = "../data/level_2_data.csv"; 
+        CSVReader reader(',', true);
 
-    readCSV(filename, data);
+        auto data = reader.readCSV(filename);
 
-    // Output the data for verification
-    for (const auto& row : data) {
-        for (const auto& cell : row) {
-            std::cout << cell << " ";
+        if (!reader.validateData(data)) {
+            std::cerr << "CSV data validation failed!" << std::endl;
+            return 1;
         }
-        std::cout << std::endl;
-    }
 
+        const auto& headers = reader.getHeaders();
+        if (!headers.empty()) {
+                std::cout << "Headers: ";
+                for (const auto& header : headers) {
+                    std::cout << header << " ";
+                }
+                std::cout << std::endl << std::endl;
+        };
+
+        std::cout << "Data:" << std::endl;
+        for (size_t i = 0; i < data.size(); ++i) {
+            std::cout << "Row " << i + 1 << ": ";
+            for (const auto& cell : data[i]) {
+                std::cout << cell << " ";
+            }
+            std::cout << std::endl;
+        };
+    }  catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
     return 0;
 }
