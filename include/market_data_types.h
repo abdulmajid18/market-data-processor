@@ -9,9 +9,20 @@
 
 namespace MarketDataTypes {
     struct TimePoint {
-        std::chrono::system_clock::time_point timestamp;
+    std::chrono::system_clock::time_point timestamp;
 
-        static TimePoint parse(const std::string& ts);
+    static TimePoint parse(const std::string& ts) {
+        std::tm tm = {};
+        std::istringstream ss(ts);
+        ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+        if (ss.fail()) {
+            throw std::invalid_argument("Invalid time format");
+        }
+        auto time_t = std::mktime(&tm);
+        TimePoint tp;
+        tp.timestamp = std::chrono::system_clock::from_time_t(time_t);
+        return tp;
+        }
     };
 
     struct Level1Data {
@@ -28,7 +39,7 @@ namespace MarketDataTypes {
 
     struct Level2Data {
         static const int DEPTH = 3;  // Number of price levels
-
+        
         std::string symbol;
         TimePoint timestamp;
         struct PriceLevel {
@@ -48,5 +59,4 @@ namespace MarketDataTypes {
 
     using MarketData = std::variant<Level1Data, Level2Data, Level3Data>;
 }
-
 #endif
