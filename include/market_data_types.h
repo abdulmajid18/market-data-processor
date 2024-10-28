@@ -57,6 +57,12 @@ namespace MarketDataTypes {
         int trade_size;
     };
 
+    struct CompositeMarketData {
+        Level1Data level1;
+        Level2Data level2;
+        Level3Data level3;
+    };
+
     using MarketData = std::variant<Level1Data, Level2Data, Level3Data>;
 }
 #endif
